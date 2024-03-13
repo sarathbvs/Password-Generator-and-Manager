@@ -1,0 +1,111 @@
+import tkinter as tk 
+from tkinter import * 
+from tkinter import ttk 
+import string 
+import random 
+# Create the main window 
+window = tk.Tk() 
+window.title("Password Manager and Generator") 
+window.geometry("350x400") 
+# Create tab control 
+tab_control = ttk.Notebook(window) 
+# Create tab1 
+tab1 = ttk.Frame(tab_control) 
+tab_control.add(tab1, text='Generator') 
+# Create tab2 
+tab2 = ttk.Frame(tab_control) 
+tab_control.add(tab2, text='Saved Passwords') 
+tab_control.pack(expand=1, fill="both") 
+# Create labels and entry fields 
+lbl_website = Label(tab1, text="Website") 
+lbl_website.grid(column=0, row=0, pady=5, padx=5) 
+txt_website = Entry(tab1, width=20) 
+txt_website.grid(column=1, row=0, pady=5, padx=5) 
+lbl_email = Label(tab1, text="Email") 
+lbl_email.grid(column=0, row=1, pady=5, padx=5) 
+txt_email = Entry(tab1, width=20) 
+txt_email.grid(column=1, row=1, pady=5, padx=5) 
+# Create spinbox 
+lbl_length = Label(tab1, text="Length") 
+lbl_length.grid(column=0, row=2, pady=5, padx=5) 
+spin_length = Spinbox(tab1, from_=8, to=18) 
+spin_length.grid(column=1, row=2, pady=5, padx=5) 
+# Create radio button 
+lbl_strength = Label(tab1, text="Strength") 
+lbl_strength.grid(column=0, row=3, pady=5, padx=5) 
+var = IntVar() 
+rad_low = Radiobutton(tab1, text="Low", value=1, variable=var) 
+rad_low.grid(column=1, row=3, pady=5, padx=5) 
+rad_medium = Radiobutton(tab1, text="Medium", value=2, variable=var) 
+rad_medium.grid(column=1, row=4, pady=5, padx=5) 
+rad_high = Radiobutton(tab1, text="High", value=3, variable=var) 
+rad_high.grid(column=1, row=5, pady=5, padx=5) 
+
+ 
+# Create generate button 
+def generate_password(): 
+    length = int(spin_length.get()) 
+    strength = var.get() 
+    website = txt_website.get() 
+    email = txt_email.get() 
+    password = '' 
+ 
+    if strength == 1: 
+        for i in range(length): 
+            password = password + random.choice(string.ascii_lowercase) 
+    elif strength == 2: 
+        for i in range(length): 
+            password = password + random.choice(string.ascii_lowercase + 
+string.ascii_uppercase + string.digits) 
+    elif strength == 3: 
+        for i in range(length): 
+            password = password + random.choice( 
+                string.ascii_lowercase + string.ascii_uppercase + string.digits + 
+string.punctuation) 
+ 
+    print(password) 
+    txt_password.delete(0, END) 
+    txt_password.insert(0, password) 
+ 
+ 
+btn_generate = Button(tab1, text="Generate", command=generate_password) 
+btn_generate.grid(column=1, row=6, pady=5, padx=5) 
+ 
+# Create entry field to show generated password 
+lbl_password = Label(tab1, text="Password") 
+lbl_password.grid(column=0, row=7, pady=5, padx=5) 
+ 
+txt_password = Entry(tab1, width=20) 
+txt_password.grid(column=1, row=7, pady=5, padx=5) 
+ 
+ 
+# Create save button 
+def save_password(): 
+    website = txt_website.get() 
+    email = txt_email.get() 
+    password = txt_password.get() 
+    tree_saved.insert("", 'end', text=website, values=(email, password)) 
+    with open("password_file.txt", "a") as f: 
+        f.write(f"Website : {website} ,  {email} ? Password ; {password} \n") 
+ 
+ 
+btn_save = Button(tab1, text="Save", command=save_password) 
+btn_save.grid(column=1, row=8, pady=5, padx=5) 
+ 
+# Create tree view 
+tree_saved = ttk.Treeview(tab2, columns=("email", "password")) 
+tree_saved.heading("#0", text="Website") 
+tree_saved.heading("email", text="Email") 
+tree_saved.heading("password", text="Password") 
+ 
+# Retrieve saved passwords from text file 
+with open("password_file.txt", "r") as f: 
+    for line in f: 
+        line = line.strip() 
+        website = line[line.find(":")+2:line.find(",")] 
+        email = line[line.find(",")+2:line.find("?")-1] 
+        password = line[line.find(";")+2:] 
+tree_saved.insert("", 'end', text=website,values=(email, password)) 
+tree_saved.pack() 
+# Create the window loop 
+window.mainloop()
